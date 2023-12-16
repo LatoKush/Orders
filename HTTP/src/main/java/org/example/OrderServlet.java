@@ -1,8 +1,6 @@
 package org.example;
 
 import org.example.ConsoleCRUD;
-
-import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -12,9 +10,34 @@ import java.io.PrintWriter;
 
 @WebServlet("/orders")
 public class OrderServlet extends HttpServlet {
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        PrintWriter pr = resp.getWriter();
-        pr.write("Its working!!!");
+
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String orderId = request.getParameter("orderId");
+        if (orderId != null) {
+            PrintWriter out = response.getWriter();
+            out.println("Data for orderId " + orderId);
+        } else {
+            PrintWriter out = response.getWriter();
+            out.println("All orders");
+        }
+    }
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String data = request.getParameter("data");
+        PrintWriter out = response.getWriter();
+        out.println("Order created");
+    }
+
+    protected void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String orderId = request.getParameter("orderId");
+        String newData = request.getParameter("newData");
+        PrintWriter out = response.getWriter();
+        out.println("Order updated");
+    }
+
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String orderId = request.getParameter("orderId");
+        PrintWriter out = response.getWriter();
+        out.println("Order deleted");
     }
 }
+
