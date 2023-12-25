@@ -1,6 +1,8 @@
 package org.example;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class ConsoleCRUD {
@@ -65,7 +67,31 @@ public class ConsoleCRUD {
                 }
             }
         }
+    public static List<String> getAllOrders(Connection connection) throws SQLException {
+        List<String> orders = new ArrayList<>();
+        String selectQuery = "SELECT * FROM public.\"OrdersList\"";
 
+        try (PreparedStatement statement = connection.prepareStatement(selectQuery)) {
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    int orderID = resultSet.getInt("orderID");
+                    String dateCreated = resultSet.getString("dataCreated");
+                    String status = resultSet.getString("status");
+                    int customerID = resultSet.getInt("customerID");
+                    int employeeID = resultSet.getInt("employeeID");
+
+                    String order = "OrderID: " + orderID +
+                            ", Date Created: " + dateCreated +
+                            ", Status: " + status +
+                            ", CustomerID: " + customerID +
+                            ", EmployeeID: " + employeeID;
+
+                    orders.add(order);
+                }
+            }
+        }
+        return orders;
+    }
 
     private static void addOrder(Connection connection, Scanner scanner) throws SQLException {
         System.out.println("Введите дату создания (формат: ГГГГ-ММ-ДД):");
@@ -106,6 +132,40 @@ public class ConsoleCRUD {
             }
         }
     }
+    public static void addOrderPost(Connection connection, int orderID, String dateCreated, String status, int customerID, int employeeID) throws SQLException {
+        String insertQuery = "INSERT INTO public.\"OrdersList\" (\"orderID\", \"dataCreated\", \"status\", \"customerID\", \"employeeID\") VALUES (?, ?, ?, ?, ?)";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
+            preparedStatement.setInt(1, orderID);
+            preparedStatement.setString(2, dateCreated);
+            preparedStatement.setString(3, status);
+            preparedStatement.setInt(4, customerID);
+            preparedStatement.setInt(5, employeeID);
+
+            int rowsInserted = preparedStatement.executeUpdate();
+
+            if (rowsInserted > 0) {
+                System.out.println("Заказ добавлен успешно.");
+            } else {
+                System.out.println("Не удалось добавить заказ.");
+            }
+        }
+    }
+    public static void updateOrderPut(Connection connection, int orderID, String newStatus) throws SQLException {
+        String updateQuery = "UPDATE public.\"OrdersList\" SET \"status\" = ? WHERE \"orderID\" = ?";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(updateQuery)) {
+            preparedStatement.setString(1, newStatus);
+            preparedStatement.setInt(2, orderID);
+
+            int rowsUpdated = preparedStatement.executeUpdate();
+
+            if (rowsUpdated > 0) {
+                System.out.println("Заказ обновлен успешно.");
+            } else {
+                System.out.println("Не удалось обновить заказ. Возможно, заказ с указанным orderID не найден.");
+            }
+        }
+    }
 
 
     private static void updateOrderStatus(Connection connection, Scanner scanner) throws SQLException {
@@ -127,6 +187,17 @@ public class ConsoleCRUD {
             } else {
                 System.out.println("Заказ с указанным OrderID не найден.");
             }
+        }
+    }
+    public static boolean deleteOrderDel(Connection connection, int orderID) throws SQLException {
+        String deleteQuery = "DELETE FROM public.\"OrdersList\" WHERE \"orderID\" = ?";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(deleteQuery)) {
+            preparedStatement.setInt(1, orderID);
+
+            int rowsDeleted = preparedStatement.executeUpdate();
+
+            return rowsDeleted > 0;
         }
     }
 

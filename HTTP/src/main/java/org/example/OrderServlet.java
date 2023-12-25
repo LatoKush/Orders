@@ -1,43 +1,30 @@
 package org.example;
 
-import org.example.ConsoleCRUD;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
 
-@WebServlet("/orders")
 public class OrderServlet extends HttpServlet {
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String orderId = request.getParameter("orderId");
-        if (orderId != null) {
+        response.setContentType("text/html;charset=UTF-8");
+
+        try (Connection connection = DatabaseConnection.getConnection()) {
+            List<String> allOrders = ConsoleCRUD.getAllOrders(connection);
             PrintWriter out = response.getWriter();
-            out.println("Data for orderId " + orderId);
-        } else {
-            PrintWriter out = response.getWriter();
-            out.println("All orders");
+            out.println("<html><body>");
+            for (String order : allOrders) {
+                out.println("<p>" + order + "</p>");
+            }
+            out.println("</body></html>");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Ошибка при получении данных из базы данных");
         }
     }
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String data = request.getParameter("data");
-        PrintWriter out = response.getWriter();
-        out.println("Order created");
-    }
-
-    protected void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String orderId = request.getParameter("orderId");
-        String newData = request.getParameter("newData");
-        PrintWriter out = response.getWriter();
-        out.println("Order updated");
-    }
-
-    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String orderId = request.getParameter("orderId");
-        PrintWriter out = response.getWriter();
-        out.println("Order deleted");
-    }
 }
-
